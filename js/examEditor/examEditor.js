@@ -270,13 +270,12 @@ require([
 		submit: function(e, callback){
 			var $target = $(e.currentTarget);
 			var that = this;
-			$target.addClass('disabled');
 
 			var modules = this.modulesCollection.toJSON();
 			var result = this.formatModules(modules);
 
 			var url = 'service/pythonLessonPreview.mvc';
-			console.log(result);
+			alert(JSON.stringify(result, null, 4));
 		},
 		changeMode: function(){
 			var change = confirm('warning! after switching to expert mode, you cannot undo!');
@@ -302,7 +301,6 @@ require([
 				data.problemId = this.problemId;
 			} 
 
-			console.log(data);
 			var config = {
 				sampleCode: {
 					type: 'required',

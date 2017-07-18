@@ -75,6 +75,9 @@ img {
   margin-right: 0;
   overflow: hidden;
 }
+#header > h2 {
+  margin-left: 20px;
+}
 #header .brand {
   float: left;
   width: 240px;
@@ -969,4 +972,8 @@ cookie-container {
 
 #solution-content {
   height: 400px;
+}
+
+.input-group-btn button{
+  line-height: 15px;
 }
