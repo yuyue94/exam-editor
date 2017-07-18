@@ -1,0 +1,133 @@
+@webgoat-red: #e84c3d;
+
+body {
+	background-color: #F1F2F7;
+}
+
+.clear-float {
+	clear: both;
+}
+
+#result-basic-wrapper {
+	float: left;
+	margin-top: 40px;
+	font-size: 24px;
+	span {
+		margin-left: 20px;
+	}
+}
+
+.result-block {
+	background-color: white;
+	padding: 0 20px;
+	padding-bottom: 10px;
+	margin-top: 20px;
+	.chart-block {
+		padding-top: 5px;
+		&.col-md-6 {
+			padding: 0;
+		}
+		&#score-table-div {
+			> h3 i {
+				float: right;
+				cursor: pointer;
+				&:hover {
+					color: @webgoat-red;
+				}
+			}
+			table {
+				tr {
+					cursor: default;
+					td .used {
+						color: @webgoat-red;
+					}
+				}
+				tr.lab {
+					&:hover {
+						td:first-child {
+							position: relative;
+							&:before {
+								content: '';
+								position: absolute;
+								left: 0px;
+								width: 5px;
+								height: 20px;
+								background-color: lighten(@webgoat-red, 10%);
+							}
+						}
+					}
+					cursor: pointer;
+					td:first-child{
+						&:after {
+							color: red;
+							content:'*';
+						}
+					}
+				}
+				tr.stage {
+					display: none;
+					background-color: #eee;
+					td:first-child {
+						padding-left: 5%;
+					}
+				}	
+			}	
+		}
+
+		&#request-records-div {
+			.request-record-div {
+				.nav>li>a:hover, .nav>li>a:focus {
+					color: #555;
+				}
+				table {
+					tr {
+						td.requests {
+							span {
+								text-decoration: underline;
+								color: #337ab7;	
+								cursor: pointer;
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
+
+#popup {
+	pointer-events: none;
+	display: none;
+	position: absolute;
+	width: 200px;
+	background-color: white;
+	border: 1px solid #ddd;
+	border-radius: 10px;
+	-moz-box-shadow: 1px 1px 2px #ddd;
+	-ms-box-shadow: 1px 1px 2px #ddd;
+	-webkit-box-shadow: 1px 1px 2px #ddd;
+	box-shadow: 1px 1px 2px #ddd;
+	table {
+		margin: 0;
+	}
+	.triangle {
+		.tri(@border-width, @color){
+			width: 0;
+			height: 0;
+			content: '';
+			position: absolute;
+			left: 100px - @border-width;
+			bottom: -@border-width * 2;
+			border-color: @color transparent transparent transparent;
+			border-style: solid;
+			border-width: @border-width;
+		}
+		&:before {
+			.tri(10px, #ddd);
+		}
+		&:after {
+			.tri(8px, white);
+		}
+	}
+}

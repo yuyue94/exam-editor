@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="css/font-awesome.min.css"/>
+        <link rel="stylesheet" href="css/main.css"/>
+        <link rel="stylesheet" href="css/examEditor.css"/>
+        <link rel="stylesheet" href="js/wangEditor/dist/css/wangEditor.min.css"/>
+        <link rel="stylesheet" type="text/css" href="css/atom-one-light.min.css">
+        <script src="js/modernizr-2.6.2.min.js"></script>
+        <title>Editor</title>
+    </head>
+    <body>
+        <script id="basic-editor-tmpl" type="text/x-jquery-tmpl">
+            <div id="title-form">
+                <label>title:</label>
+                <input class="form-input" type="text">
+                <h3>description:</h3>
+                <div id="description-editor"></div>
+            </div>
+        </script>
+
+        <script id="modules-controller-tmpl" type="text/x-jquery-tmpl">
+            <ul class="slices-ul {{if state == 'small'}}special{{else}}common{{/if}}">
+                {{each(i, module) modules}}
+                    <li class="{{if module.active}}active{{/if}}{{if module.exist}} exist{{/if}}" module-id="${module.id}" title="${module.title}">
+                        <i class="${module.icon}"></i>
+                    </li>
+                {{/each}}
+            </ul>
+        </script>
+
+        <script id="module-tmpl" type="text/x-jquery-tmpl">
+            <div id="${id}-module" module-id="${id}" class="module{{if active}} active{{/if}}">
+                <h3 {{if type == "required"}}class="required"{{/if}}>
+                    ${title}
+                    {{if type == "required" && dataType != "text" && false}}
+                        <i class="fa fa-caret-square-o-down"></i>
+                    {{/if}}
+                </h3>
+
+                {{if type == "optional"}}
+                    <hr>
+                {{/if}}
+
+                <div id="${id}-editor" class="module-wrapper" data-type="${dataType}"></div>
+            </div>
+        </script>
+
+        <script id="text-editor-tmpl" type="text/x-jquery-tmpl">
+            <input type="text" class="form-input input-block" value="${value}">
+            <p class="title-hint">(should&apos;t contain the characters like ; , . $ and should&apos;t start with _ # &amp)</p>
+        </script>
+
+        <script id="hints-editor-tmpl" type="text/x-jquery-tmpl">
+            <button class="btn btn-primary add-hints">Add Hint<i class="fa fa-plus"></i></button>
+            <h3 class="hints-num">Total:<span class="total">${total}</span> <span class="plural">{{if total > 1}}hints{{else}}hint{{/if}}</span></h3>
+            <div class="current-hints"></div>
+        </script>
+
+        <script id="hint-editor-tmpl" type="text/x-jquery-tmpl">
+            <div class="current-hint">
+                <button class="delete-hint btn btn-default"><i class="fa fa-trash"></i></button>
+                <button class="up-hint btn btn-info"><i class="fa fa-long-arrow-up"></i></button>
+                <div>
+                    <input type="text" class="form-input" value="${hint}">
+                </div>
+            </div>
+        </script>
+
+        <script id="io-editor-tmpl" type="text/x-jquery-tmpl">
+            <h3>input example</h3>
+            <input type="text" class="form-input input-block" io-type="inputExample" value="${inputExample}">
+            <h3>input description</h3>
+            <input type="text" class="form-input input-block" io-type="inputDescription" value="${inputDescription}">
+            <h3>output example</h3>
+            <input type="text" class="form-input input-block" io-type="outputExample" value="${outputExample}">
+            <h3>output descrption</h3>
+            <input type="text" class="form-input input-block" io-type="outputDescription" value="${outputDescription}">
+        </script>
+
+        <script id="sample-code-params-tmpl" type="text/x-jquery-tmpl">
+            <div class="current-params"></div>
+            <div class="col-md-4">
+                <button class="add-param btn btn-primary btn-block">Add Parameter<i class="fa fa-plus"></i></button>
+            </div>
+            <pre id="sample-code-params-preview" class="col-md-12"><code></code></pre>
+        </script>
+
+        <script id="sample-code-param-tmpl" type="text/x-jquery-tmpl">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="param-input form-input input-block invalid" value="${param}">
+                    <span class="input-group-btn">
+                        <button class="delete-param btn btn-default" type="button"><i class="fa fa-trash"></i></button>
+                    </span>
+                </div>
+            </div>
+        </script>
+
+        <script id="test-case-params-tmpl" type="text/x-jquery-tmpl">
+            <button class="add-test-case btn btn-primary pull-right">Add Test Case<i class="fa fa-plus"></i></button>
+            <h3 class="test-cases-num">Total:<span class="total">${total}</span> test <span class="plural">{{if total > 1}}cases{{else}}case{{/if}}</span></h3>
+            <div class="current-test-cases"></div>
+        </script>
+
+        <script id="test-case-param-tmpl" type="text/x-jquery-tmpl">
+            <i class="fa fa-trash delete-test-case"></i>
+            <div class="test-case-basic-block block clearfix">
+                <label>Basic:</label>
+                <form class="clearfix">
+                    <div class="test-case-score-block col-md-4 form-group">
+                        <label class="col-md-9 control-label">Score(0-100):</label>
+                        <input class="col-md-3 form-input valid" type="text" value="${testCase.score}">
+                    </div>
+                    <div class="test-case-method-block col-md-8 form-group">
+                        <label class="col-md-4 control-label right">Method:</label>
+                        <select class="col-md-8 test-case-method form-input">
+                            {{each(i, method) paramMethods}}
+                                <option method="${method.name}" {{if method.name === testCase.method}}selected{{/if}}>${method.name}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="test-case-input-block block">
+                <label>Input:</label>
+                <form class="clearfix"></form>
+            </div>
+            {{if testCase.paramsNum === 2}}
+                <div class="test-case-output-block block">
+                    <label>Output:</label>
+                    <form class="clearfix"></form>
+                </div>
+            {{/if}}
+            <div class="test-case-message-block block">
+                <label>Error Message:</label>
+                <input type="text" value="${testCase.msg}" class="form-input input-block">
+            </div>
+            <a class="pull-right toggle-preview-code" href="javascript:;">Toggle Preview Code</a>
+            <div class="test-case-code-preview-block block">
+                <label>Preview Code:</label>
+                <pre><code></code></pre>
+            </div>
+        </script>
+
+        <script id="test-case-text-editor-tmpl" type="text/x-jquery-tmpl">
+            {{if io === 'input'}}
+                <label class="control-label col-md-3">${paramName}</label>
+            {{/if}}
+
+            <div class="{{if io==='input'}}col-md-7{{else}}col-md-10{{/if}}">
+                <div class="input-group">
+                    <div class="input-group-addon">${typeMarks[0]}</div>
+                    <input type="text" value="${dataStr}" class="form-input input-block valid editor"
+                            placeholder="{{if typeName === 'num'}}example => 0
+                                        {{else typeName === 'str'}}example => abc 
+                                        {{else typeName === 'list'}}example => 1,2,3
+                                        {{else typeName === 'dict'}}example => &quot;a&quot;:1,&quot;b&quot;:2
+                                        {{/if}}
+                                        ">
+                    <div class="input-group-addon">${typeMarks[1]}</div>
+                </div>
+            </div>
+
+            <select class="type-select form-input col-md-2" {{if limit}}disabled{{/if}}>
+                {{each(type, marks) typeMap}}
+                    <option type="${marks[2]}" {{if type === typeName}}selected{{/if}}>${type}</option>
+                {{/each}}
+            </select>
+        </script>
+
+        <script id="modules-tools-tmpl" type="text/x-jquery-tmpl">
+            <ul class="slices-ul">
+                {{each(i, tool) tools}}
+                    {{if !(state == 'large' && tool.title == 'expand')}}
+                        <li class="${tool.title}-tool" title="${tool.title}">
+                            <i class="${tool.icon}"></i>
+                        </li>
+                    {{/if}}
+                {{/each}}
+            </ul> 
+        </script>
+
+
+        <section id="container">
+            <header id="header">
+                <h2>cooltag's exam editor</h2>
+            </header>
+            <section>
+                <div id="exam-editor">
+                    <div id="main-wrapper" class="col-md-12 block">
+                        <h3>Exam Editor
+                            <button id="save-modules" class="btn btn-sm btn-success operation">Save</button>
+                            <button id="reset-modules" class="btn btn-sm btn-primary">Clear</button>
+                        </h3>
+                        <div id="modules-controller"></div>
+                        <hr>
+                        <div id="required-modules-wrapper"></div>
+                        <!-- <div id="basic-editor"></div> -->
+                    </div>
+                    <div id="optional-modules-wrapper" class="col-md-6 block">
+                        <div id="modules-tools"></div>
+                    </div>
+                    <a href="javascript:;" id="change-mode">Change To Expert Mode<i class="fa fa-arrow-right"></i></a>
+                </div>
+            </section>
+        </section>
+        <script src="js/libs/require.min.js" type="text/javascript"></script>
+        <script src="js/config.js" type="text/javascript"></script>
+        <script src="js/examEditor/examEditor.js" type="text/javascript"></script>
+    </body>
+</html>
